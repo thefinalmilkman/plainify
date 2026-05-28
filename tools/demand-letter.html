@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demand Letter Writer — Plainify</title>
+  <meta name="description" content="Describe your dispute in plain English. Get a professional demand letter ready to send — no lawyer needed.">
+  <link rel="canonical" href="https://plainify.com/tools/demand-letter">
+  <meta property="og:title" content="Demand Letter Writer — Plainify">
+  <meta property="og:description" content="Describe your dispute in plain English. Get a professional demand letter ready to send — no lawyer needed.">
+  <meta property="og:url" content="https://plainify.com/tools/demand-letter">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Demand Letter Writer — Plainify">
+  <meta name="twitter:description" content="Describe your dispute in plain English. Get a professional demand letter ready to send — no lawyer needed.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">✉️</div>
+      <h1>Demand Letter Writer</h1>
+      <p class="subtitle">Describe your dispute in plain English. Get a professional demand letter ready to send — no lawyer needed.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Describe your dispute here — who owes you what, and what happened...
+
+Examples:
+• My landlord kept $650 of my $800 security deposit. I moved out May 1st, gave 30 days notice, cleaned the unit, and took photos. He claims there was carpet damage but the carpet already had stains when I moved in. I have move-in photos.
+• I hired a contractor to install a fence in March. Paid $1,200 upfront. He started the job, left after one day, and hasn't returned or responded to my calls in 6 weeks. The fence is half-built.
+• I bought a laptop on eBay for $340. The seller described it as "fully functional" but it arrived with a cracked screen that was hidden in the photos. The seller stopped responding after I reported it.
+• My employer owes me $980 in unpaid overtime from the last 3 pay periods. I have records of my hours. HR has not responded to two written requests."></textarea>
+
+      <p style="font-size:0.78rem;color:#888;margin-top:-0.5rem;margin-bottom:1rem">Your text is never stored or shared.</p>
+
+      <button class="run-btn" id="run-btn" onclick="write()">
+        Write my demand letter
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">Your Demand Letter</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a demand letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A demand letter is a formal written notice asking someone to fulfill an obligation — pay money owed, return property, or stop a harmful action — before you take legal action. It creates a paper trail and often resolves disputes without going to court."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need a lawyer to write a demand letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Anyone can write and send a demand letter. A professional, well-written demand letter is often enough to resolve disputes over security deposits, contractor work, unpaid wages, and product disputes without hiring a lawyer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How should I send a demand letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Send via certified mail with return receipt requested — this proves the recipient received it. Keep a copy for your records. You can also email it if you want a faster timestamp, but certified mail is stronger evidence."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens after I send a demand letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The recipient has until the deadline in the letter to respond. If they don't, you can escalate to small claims court, file a complaint with a regulatory agency, or pursue other legal remedies. Having the letter on record strengthens your case."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this demand letter writer free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Demand Letter Writer is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function write() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Writing…';
+
+      try {
+        const res = await fetch("/api/write-demand", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dispute: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Write my demand letter";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") write();
+    });
+  </script>
+</body>
+</html>
