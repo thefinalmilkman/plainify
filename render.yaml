@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: plainify
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
