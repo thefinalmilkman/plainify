@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Builder — Plainify</title>
+  <meta name="description" content="Describe a job in plain words. Get a professional quote you can send to your client in seconds.">
+  <link rel="canonical" href="https://plainify.com/tools/quote-builder">
+  <meta property="og:title" content="Quote Builder — Plainify">
+  <meta property="og:description" content="Describe a job in plain words. Get a professional quote you can send to your client in seconds.">
+  <meta property="og:url" content="https://plainify.com/tools/quote-builder">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Quote Builder — Plainify">
+  <meta name="twitter:description" content="Describe a job in plain words. Get a professional quote you can send to your client in seconds.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">📄</div>
+      <h1>Quote Builder</h1>
+      <p class="subtitle">Describe what you're doing for a client in plain words. Get back a professional quote you can send, no business experience required.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Describe the job in plain words...
+
+Examples:
+• I'm cleaning a 3 bedroom house, deep clean, takes about 4 hours, I charge $25/hr
+• Fixing a fence, about 20 feet, replacing 6 posts, materials cost me $80
+• Mowing a lawn every 2 weeks, medium yard, I want $45 each time
+• Installing a ceiling fan in 2 rooms, about 2 hours total, $60/hr labor"></textarea>
+
+      <button class="run-btn" id="run-btn" onclick="build()">
+        Build my quote
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">Your Professional Quote</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a quote builder?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A quote builder turns your plain-language description of a job into a professional, client-ready quote with pricing, scope, and payment terms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is the quote builder for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Contractors, cleaners, landscapers, handymen, freelancers — anyone who needs to send a professional-looking quote to a client but doesn't have business writing experience."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this tool free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Quote Builder is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function build() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Building…';
+
+      try {
+        const res = await fetch("/api/build-quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Build my quote";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") build();
+    });
+  </script>
+</body>
+</html>
