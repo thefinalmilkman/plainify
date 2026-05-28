@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice &amp; Warning Decoder — Plainify</title>
+  <meta name="description" content="Paste any government letter, IRS notice, or shutoff warning. Find out what it means and exactly what to do by when.">
+  <link rel="canonical" href="https://plainify.com/tools/notice-decoder">
+  <meta property="og:title" content="Notice &amp; Warning Decoder — Plainify">
+  <meta property="og:description" content="Paste any government letter, IRS notice, or shutoff warning. Find out what it means and exactly what to do by when.">
+  <meta property="og:url" content="https://plainify.com/tools/notice-decoder">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Notice &amp; Warning Decoder — Plainify">
+  <meta name="twitter:description" content="Paste any government letter, IRS notice, or shutoff warning. Find out what it means and exactly what to do by when.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">📬</div>
+      <h1>Notice &amp; Warning Decoder</h1>
+      <p class="subtitle">Paste any government letter, IRS notice, or shutoff warning. Find out what it means and exactly what to do by when.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Paste your notice, letter, or warning here...
+
+Examples:
+• IRS Notice CP2000 — We're proposing changes to your 2024 return. The income we received from third parties doesn't match what you reported. Amount due: $1,847. Respond by: 05/15/2026.
+• Utility shutoff notice — Your account is past due $184.22. Service will be disconnected on or after 06/01/2026 unless payment is received or a payment arrangement is made.
+• Eviction Notice — You are hereby notified that you are in violation of your lease agreement due to non-payment of rent totaling $2,400. You have 3 days to pay or vacate the premises.
+• City code violation — Property at [address] is in violation of Municipal Code 15.24.080 (overgrown vegetation). Correction required within 14 days. Failure to comply: $250/day fine."></textarea>
+
+      <p style="font-size:0.78rem;color:#888;margin-top:-0.5rem;margin-bottom:1rem">Your text is never stored or shared.</p>
+
+      <button class="run-btn" id="run-btn" onclick="decode()">
+        Decode this notice
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">What this means and what to do</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is IRS Notice CP2000?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IRS Notice CP2000 means the IRS found income reported by a third party (employer, bank, broker) that doesn't match your tax return. It proposes a change and asks you to agree or disagree — it is not a final bill. You have time to respond."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I ignore a utility shutoff notice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your utility service will be disconnected on or after the date stated. Most utilities offer payment arrangements before disconnection — call the number on the notice before the deadline to set one up."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does a 3-day eviction notice mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A 3-day notice is a required legal step before a landlord can file for eviction in court. It gives you 3 days to pay unpaid rent or vacate. If you pay within those 3 days, the eviction process typically stops."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I appeal or dispute a government notice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Most government notices have an appeal or response process. IRS notices have 30-60 day windows. Utility shutoffs can often be delayed with a payment plan. Paste your notice here to find out your exact options."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this notice decoder free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Notice & Warning Decoder is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function decode() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Decoding…';
+
+      try {
+        const res = await fetch("/api/decode-notice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notice: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Decode this notice";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+    });
+  </script>
+</body>
+</html>
