@@ -606,8 +606,12 @@ RULES:
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`Plainify running → http://localhost:${PORT}`);
-  const active = LLM_PROVIDERS.filter(p => p.key()).map(p => p.name);
-  console.log(`LLM providers: ${active.length ? active.join(" → ") : "NONE — set GROQ_API_KEY"}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Plainify running → http://localhost:${PORT}`);
+    const active = LLM_PROVIDERS.filter(p => p.key()).map(p => p.name);
+    console.log(`LLM providers: ${active.length ? active.join(" → ") : "NONE — set GROQ_API_KEY"}`);
+  });
+} else {
+  module.exports = app;
+}
