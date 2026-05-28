@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lease Reader — Plainify</title>
+  <meta name="description" content="Paste your lease agreement. Get back what it actually says — the clauses that matter and the ones to watch out for.">
+  <link rel="canonical" href="https://plainify.com/tools/lease-reader">
+  <meta property="og:title" content="Lease Reader — Plainify">
+  <meta property="og:description" content="Paste your lease agreement. Get back what it actually says — the clauses that matter and the ones to watch out for.">
+  <meta property="og:url" content="https://plainify.com/tools/lease-reader">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Lease Reader — Plainify">
+  <meta name="twitter:description" content="Paste your lease agreement. Get back what it actually says — the clauses that matter and the ones to watch out for.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">📋</div>
+      <h1>Lease Reader</h1>
+      <p class="subtitle">Paste any lease or contract — apartment, car, service agreement, employment. Get the 5 things you need to know before signing, in plain English.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Paste your lease or contract text here...
+
+Example:
+LEASE AGREEMENT — This Residential Lease Agreement is entered into on January 1, 2026, between Landlord (Owner) and Tenant. The lease term is 12 months beginning February 1, 2026. Monthly rent is $1,200 due on the 1st; a late fee of $75 applies after the 5th. Tenant is responsible for all utilities. Early termination requires 60 days written notice and forfeiture of the security deposit. Lease automatically renews month-to-month unless 30-day written notice is given by either party..."></textarea>
+
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:-0.5rem;margin-bottom:1rem;">Your text stays on your device and is never stored.</p>
+
+      <button class="run-btn" id="run-btn" onclick="readLease()">
+        Read this lease
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">What you need to know</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does a lease reader do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A lease reader summarizes the key terms of your rental agreement — rent, deposit rules, lease length, pet policies, termination clauses — and flags anything unusual or potentially harmful."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use a lease reader instead of a lawyer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A lease reader gives you a plain-English summary to help you understand your lease. For complex situations or large commercial leases, consult a real estate attorney."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this tool free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Lease Reader is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function readLease() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Reading…';
+
+      try {
+        const res = await fetch("/api/read-lease", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lease: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Read this lease";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") readLease();
+    });
+  </script>
+</body>
+</html>
