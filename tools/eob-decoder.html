@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insurance EOB Decoder — Plainify</title>
+  <meta name="description" content="Paste your Explanation of Benefits or insurance letter. Find out what you actually owe — and what to dispute.">
+  <link rel="canonical" href="https://plainify.com/tools/eob-decoder">
+  <meta property="og:title" content="Insurance EOB Decoder — Plainify">
+  <meta property="og:description" content="Paste your Explanation of Benefits or insurance letter. Find out what you actually owe — and what to dispute.">
+  <meta property="og:url" content="https://plainify.com/tools/eob-decoder">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Insurance EOB Decoder — Plainify">
+  <meta name="twitter:description" content="Paste your Explanation of Benefits or insurance letter. Find out what you actually owe — and what to dispute.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">📋</div>
+      <h1>Insurance EOB Decoder</h1>
+      <p class="subtitle">Paste your insurance paperwork. Find out what you actually owe — and what to dispute.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Paste your Explanation of Benefits (EOB) or insurance letter here...
+
+Examples:
+• Billed: $1,240.00 / Allowed: $380.00 / Plan Paid: $304.00 / Your Responsibility: $76.00 / Reason: CO-20 (deductible not met)
+• EOB from UnitedHealthcare — ER visit 03/14/2026 — Claim denied: Service not covered under your plan, remark code OA-109
+• Blue Cross EOB: Preventive care visit — 100% covered. Lab work (CPT 80053): $145.00 billed, $52.00 allowed, $52.00 applied to deductible, $0 paid by plan.
+• Cigna — Physical therapy claim. CO-97: Payment adjusted because payment has already been made for same/similar procedure within the set time frame."></textarea>
+
+      <p style="font-size:0.78rem;color:#888;margin-top:-0.5rem;margin-bottom:1rem">Your text is never stored or shared.</p>
+
+      <button class="run-btn" id="run-btn" onclick="decode()">
+        Decode this EOB
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">What this means and what to do</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is an EOB (Explanation of Benefits)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An EOB is a document from your insurance company showing what a medical service cost, what insurance paid, and what you owe. It is not a bill — but it explains what led to your bill."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why was my insurance claim denied?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claims are denied for many reasons: the service wasn't covered, the provider was out-of-network, prior authorization wasn't obtained, or a billing code error was made. Many denials can be appealed — paste your EOB to find out why yours was denied and what to do next."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does 'applied to deductible' mean on my EOB?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your deductible is the amount you pay out-of-pocket before insurance starts covering costs. 'Applied to deductible' means the charge counted toward that annual total, but your insurance did not pay it — you owe it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I dispute a charge on my EOB?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. If you believe a charge is wrong — wrong billing code, service you didn't receive, out-of-network when you thought you were in-network — you can file an appeal with your insurer. Paste your EOB here to find out if yours is disputable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this EOB decoder free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Insurance EOB Decoder is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function decode() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Decoding…';
+
+      try {
+        const res = await fetch("/api/decode-eob", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ eob: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Decode this EOB";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+    });
+  </script>
+</body>
+</html>
