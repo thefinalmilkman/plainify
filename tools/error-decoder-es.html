@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decodificador de Errores — Plainify</title>
+  <meta name="description" content="Pega cualquier mensaje de error de Windows. Obtén lo que significa y qué hacer — sin conocimientos técnicos.">
+  <link rel="canonical" href="https://plainify.com/tools/error-decoder-es">
+  <meta property="og:title" content="Decodificador de Errores — Plainify">
+  <meta property="og:description" content="Pega cualquier mensaje de error de Windows. Obtén lo que significa y qué hacer — sin conocimientos técnicos.">
+  <meta property="og:url" content="https://plainify.com/tools/error-decoder-es">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Decodificador de Errores — Plainify">
+  <meta name="twitter:description" content="Pega cualquier mensaje de error de Windows. Obtén lo que significa y qué hacer — sin conocimientos técnicos.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← Todas las herramientas</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">🔴</div>
+      <h1>Decodificador de Errores</h1>
+      <p class="subtitle">Pega cualquier mensaje de error de Windows. Te explicamos qué significa y exactamente qué hacer — sin necesidad de conocimientos técnicos.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Pega tu mensaje de error aquí...
+
+Ejemplos:
+• CRITICAL_PROCESS_DIED
+• 0x0000007E
+• La aplicación no pudo iniciarse correctamente (0xc000007b)
+• Error 0x80070005: Acceso denegado
+• DPC_WATCHDOG_VIOLATION"></textarea>
+
+      <button class="run-btn" id="run-btn" onclick="decode()">
+        Decodificar este error
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">En palabras simples</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copiar</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Sin registro. Sin rastreo. Sin relleno.</p>
+    <p>Hecho por <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué es un decodificador de errores?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Un decodificador de errores traduce los códigos de error de Windows y mensajes de fallo en español sencillo, diciéndote qué salió mal y exactamente qué hacer para solucionarlo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo encuentro mi código de error de Windows?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Los códigos de error aparecen en ventanas emergentes, en el Visor de Eventos o en la pantalla azul cuando tu PC falla. Copia el texto completo del error y pégalo en el decodificador."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Es gratuita esta herramienta?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. El Decodificador de Errores de Plainify es completamente gratuito y no requiere registro."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function decode() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Decodificando…';
+
+      try {
+        const res = await fetch("/api/decode-error-es", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ error: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Algo salió mal.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "No se pudo conectar al servidor. Intenta de nuevo.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Decodificar este error";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "¡Copiado!";
+        setTimeout(() => btn.textContent = "Copiar", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+    });
+  </script>
+</body>
+</html>
