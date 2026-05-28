@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Decoder — Plainify</title>
+  <meta name="description" content="Paste any Windows error message. Get back what it means and exactly what to do — no tech knowledge required.">
+  <link rel="canonical" href="https://plainify.com/tools/error-decoder">
+  <meta property="og:title" content="Error Decoder — Plainify">
+  <meta property="og:description" content="Paste any Windows error message. Get back what it means and exactly what to do — no tech knowledge required.">
+  <meta property="og:url" content="https://plainify.com/tools/error-decoder">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Error Decoder — Plainify">
+  <meta name="twitter:description" content="Paste any Windows error message. Get back what it means and exactly what to do — no tech knowledge required.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">🔴</div>
+      <h1>Error Decoder</h1>
+      <p class="subtitle">Paste any Windows error, crash message, or blue screen code. Get back what it actually means and exactly what to do — no tech knowledge required.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Paste your error message here...
+
+Examples:
+• CRITICAL_PROCESS_DIED
+• 0x0000007E
+• The application was unable to start correctly (0xc000007b)
+• Error 0x80070005: Access is denied
+• DPC_WATCHDOG_VIOLATION"></textarea>
+
+      <button class="run-btn" id="run-btn" onclick="decode()">
+        Decode this error
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">Plain English</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is an error decoder?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An error decoder translates technical Windows error codes and crash messages into plain English, telling you what went wrong and exactly what to do to fix it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I find my Windows error code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Windows error codes appear in pop-up dialogs, the Event Viewer (search 'Event Viewer' in Start), or on the blue screen when your PC crashes. Copy the full error text and paste it into the decoder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this tool free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Error Decoder is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function decode() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Decoding…';
+
+      try {
+        const res = await fetch("/api/decode-error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ error: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Decode this error";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+    });
+  </script>
+</body>
+</html>
