@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Bill Decoder — Plainify</title>
+  <meta name="description" content="Paste your medical bill or EOB. Get every charge explained and know what to question.">
+  <link rel="canonical" href="https://plainify.com/tools/medical-bill">
+  <meta property="og:title" content="Medical Bill Decoder — Plainify">
+  <meta property="og:description" content="Paste your medical bill or EOB. Get every charge explained and know what to question.">
+  <meta property="og:url" content="https://plainify.com/tools/medical-bill">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Plainify">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Medical Bill Decoder — Plainify">
+  <meta name="twitter:description" content="Paste your medical bill or EOB. Get every charge explained and know what to question.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <!-- Analytics: replace UMAMI_WEBSITE_ID after creating account at umami.is -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID"></script>
+</head>
+<body>
+  <main>
+    <div class="tool-page">
+      <a class="back-link" href="../index.html">← All tools</a>
+
+      <div style="font-size:2rem;margin-bottom:0.5rem">🏥</div>
+      <h1>Medical Bill Decoder</h1>
+      <p class="subtitle">Paste your hospital bill or insurance statement. Find out what you're actually being charged for — and what to dispute.</p>
+
+      <textarea
+        class="input-area"
+        id="input"
+        placeholder="Paste your medical bill or EOB here...
+
+Examples:
+• 99283  ER E/M Level 3                  $842.00
+• 71046  Chest X-Ray, 2 views            $310.00
+• 85025  CBC with differential           $128.00
+• 93000  Electrocardiogram routine       $215.00
+• Room & Board — Observation 12hr       $1,240.00
+• Physician Fee — Emergency Medicine     $475.00"></textarea>
+
+      <p style="font-size:0.78rem;color:#888;margin-top:-0.5rem;margin-bottom:1rem">Your text is never stored or shared.</p>
+
+      <button class="run-btn" id="run-btn" onclick="decode()">
+        Decode this bill
+      </button>
+
+      <div class="output-box" id="output">
+        <div class="label">Plain English</div>
+        <div id="output-text"></div>
+        <button class="copy-btn" onclick="copy()">Copy</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>No signup. No tracking. No bloat.</p>
+    <p>Built by <a href="https://redkingsdesigns.netlify.app" target="_blank">RedKingsDesigns</a></p>
+  </footer>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a medical bill decoder?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A medical bill decoder explains the charges on your hospital or doctor bill — including EOB (Explanation of Benefits) documents — so you know what you're being charged for and what to question."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is an EOB?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An EOB (Explanation of Benefits) is a document from your insurance company showing what a medical service cost, what insurance paid, and what you owe. It is not a bill, but it explains what led to your bill."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this tool free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Plainify's Medical Bill Decoder is completely free with no signup required."
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    async function decode() {
+      const input = document.getElementById("input").value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Decoding…';
+
+      try {
+        const res = await fetch("/api/decode-medical-bill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bill: input }),
+        });
+        const data = await res.json();
+
+        const out = document.getElementById("output");
+        document.getElementById("output-text").textContent = data.result || data.error || "Something went wrong.";
+        out.classList.add("visible");
+      } catch (e) {
+        document.getElementById("output-text").textContent = "Could not reach the server. Try again.";
+        document.getElementById("output").classList.add("visible");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Decode this bill";
+      }
+    }
+
+    function copy() {
+      const text = document.getElementById("output-text").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1500);
+      });
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+    });
+  </script>
+</body>
+</html>
